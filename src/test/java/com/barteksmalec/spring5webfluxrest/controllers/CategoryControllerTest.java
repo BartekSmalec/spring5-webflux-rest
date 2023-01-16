@@ -13,7 +13,8 @@ import reactor.core.publisher.Mono;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class CategoryControllerTest {
 
@@ -66,7 +67,7 @@ class CategoryControllerTest {
     }
 
     @Test
-    void update(){
+    void update() {
         given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(
                 Category.builder().description("Some description").build()));
 
@@ -77,5 +78,44 @@ class CategoryControllerTest {
                 .body(categoryMono, Category.class)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    void patchWithChanges() {
+
+        given(categoryRepository.findById(anyString())).willReturn(Mono.just(
+                Category.builder().build()));
+
+        given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(
+                Category.builder().build()));
+
+        Mono<Category> categoryMono = Mono.just(Category.builder().description("Some cat").build());
+
+        webTestClient.patch()
+                .uri(URI + "someid")
+                .body(categoryMono, Category.class)
+                .exchange()
+                .expectStatus().isOk();
+        verify(categoryRepository).save(any());
+    }
+
+
+    @Test
+    void patchNoChanges() {
+
+        given(categoryRepository.findById(anyString())).willReturn(Mono.just(
+                Category.builder().build()));
+
+        given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(
+                Category.builder().build()));
+
+        Mono<Category> categoryMono = Mono.just(Category.builder().build());
+
+        webTestClient.patch()
+                .uri(URI + "someid")
+                .body(categoryMono, Category.class)
+                .exchange()
+                .expectStatus().isOk();
+        verify(categoryRepository, never()).save(any());
     }
 }

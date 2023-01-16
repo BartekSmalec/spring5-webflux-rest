@@ -13,6 +13,8 @@ import reactor.core.publisher.Mono;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 class VendorControllerTest {
     public static final String URI = "/api/v1/vendors/";
@@ -75,5 +77,40 @@ class VendorControllerTest {
                 .body(vendorMono, Vendor.class)
                 .exchange()
                 .expectStatus().isOk();
+    }
+
+    @Test
+    void patchWithChanges() {
+        given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().build()));
+
+        given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstname("Ola").lastname("Kot").build());
+
+        webTestClient.patch()
+                .uri(URI + "id")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository).save(any());
+    }
+
+
+    @Test
+    void patchNoChanges() {
+        given(vendorRepository.findById(anyString())).willReturn(Mono.just(Vendor.builder().build()));
+
+        given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().build());
+
+        webTestClient.patch()
+                .uri(URI + "id")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(vendorRepository, never()).save(any());
     }
 }

@@ -1,6 +1,5 @@
 package com.barteksmalec.spring5webfluxrest.controllers;
 
-import com.barteksmalec.spring5webfluxrest.model.Category;
 import com.barteksmalec.spring5webfluxrest.model.Vendor;
 import com.barteksmalec.spring5webfluxrest.repostitories.VendorRepository;
 import org.reactivestreams.Publisher;
@@ -30,16 +29,28 @@ public class VendorController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    Mono<Void> create(@RequestBody Publisher<Vendor> vendorPublisher){
+    Mono<Void> create(@RequestBody Publisher<Vendor> vendorPublisher) {
         return vendorRepository.saveAll(vendorPublisher).then();
     }
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    Mono<Vendor> update(@PathVariable String id, @RequestBody Vendor vendor){
+    Mono<Vendor> update(@PathVariable String id, @RequestBody Vendor vendor) {
         vendor.setId(id);
         return vendorRepository.save(vendor);
     }
 
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    Mono<Vendor> patch(@PathVariable String id, @RequestBody Vendor vendor) {
+        Vendor foundVendor = vendorRepository.findById(id).block();
+
+        if (vendor.getFirstname() != null && vendor.getFirstname() != foundVendor.getFirstname()) {
+            foundVendor.setFirstname(vendor.getFirstname());
+            return vendorRepository.save(foundVendor);
+        }
+
+        return Mono.just(foundVendor);
+    }
 
 }
