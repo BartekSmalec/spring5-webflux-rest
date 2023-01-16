@@ -5,12 +5,15 @@ import com.barteksmalec.spring5webfluxrest.repostitories.CategoryRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 class CategoryControllerTest {
 
@@ -47,5 +50,32 @@ class CategoryControllerTest {
                 .exchange()
                 .expectBody(Category.class);
 
+    }
+
+    @Test
+    void create() {
+        given(categoryRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Category.builder().build()));
+
+        Mono<Category> categoryMono = Mono.just(Category.builder().description("Some Cat").build());
+
+        webTestClient.post()
+                .uri(URI)
+                .body(categoryMono, Category.class)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+    @Test
+    void update(){
+        given(categoryRepository.save(any(Category.class))).willReturn(Mono.just(
+                Category.builder().description("Some description").build()));
+
+        Mono<Category> categoryMono = Mono.just(Category.builder().description("Some cat").build());
+
+        webTestClient.put()
+                .uri(URI + "someid")
+                .body(categoryMono, Category.class)
+                .exchange()
+                .expectStatus().isOk();
     }
 }

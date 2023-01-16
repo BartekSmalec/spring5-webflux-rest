@@ -5,11 +5,12 @@ import com.barteksmalec.spring5webfluxrest.repostitories.VendorRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.reactivestreams.Publisher;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
@@ -48,5 +49,31 @@ class VendorControllerTest {
                 .uri(URI + "someid")
                 .exchange()
                 .expectBody(Vendor.class);
+    }
+
+    @Test
+    void create() {
+        given(vendorRepository.saveAll(any(Publisher.class))).willReturn(Flux.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstname("Ola").lastname("Kot").build());
+
+        webTestClient.post()
+                .uri(URI)
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isCreated();
+    }
+
+    @Test
+    void update() {
+        given(vendorRepository.save(any(Vendor.class))).willReturn(Mono.just(Vendor.builder().build()));
+
+        Mono<Vendor> vendorMono = Mono.just(Vendor.builder().firstname("Ola").lastname("Kot").build());
+
+        webTestClient.put()
+                .uri(URI + "id")
+                .body(vendorMono, Vendor.class)
+                .exchange()
+                .expectStatus().isOk();
     }
 }
