@@ -1,2 +1,3 @@
 # spring5-webflux-rest
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/BartekSmalec/spring5-webflux-rest/tree/main.svg?style=svg)](https://dl.circleci.com/status-badge/redirect/gh/BartekSmalec/spring5-webflux-rest/tree/main)
+[![codecov](https://codecov.io/gh/BartekSmalec/spring5-webflux-rest/branch/main/graph/badge.svg?token=LVk26bUJS4)](https://codecov.io/gh/BartekSmalec/spring5-webflux-rest)
